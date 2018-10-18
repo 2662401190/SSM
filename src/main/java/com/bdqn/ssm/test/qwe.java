@@ -21,7 +21,11 @@ public class qwe {
             System.out.println(t2+"***"+t1);
             return t1+t2;
         }
+    }
 
+    public qwe sdf(){
+        qwe q=new qwe();
+        return q;
     }
 
 }

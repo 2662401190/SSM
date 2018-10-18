@@ -31,19 +31,21 @@
                 <h4 class="modal-title" id="myModalLabel">员工添加</h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal">
+                <form class="form-horizontal" id="emps">
                     <%--Name--%>
                     <div class="form-group">
                         <label  class="col-sm-2 control-label">empName</label>
                         <div class="col-sm-8">
-                            <input type="text" name="empName" class="form-control" id="empName" placeholder="empName">
+                            <input type="text" name="empName" class="form-control" id="empName" placeholder="员工姓名">
+                            <span  class="help-block"></span>
                         </div>
                     </div>
                         <%--Email--%>
                     <div class="form-group">
                         <label   class="col-sm-2 control-label">Email</label>
                         <div class="col-sm-8">
-                            <input type="text" name="email" class="form-control" id="Email" placeholder="Eamil">
+                            <input type="text" name="email" class="form-control" id="Email" placeholder="邮箱">
+                            <span  class="help-block"></span>
                         </div>
                     </div>
                         <%--性别--%>
@@ -69,6 +71,7 @@
 
                 </form>
             </div>
+            <div id="cs"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 <button type="button" class="btn btn-primary" id="emp_save">保存</button>
@@ -125,7 +128,11 @@
     </div>
 </div>
 
+
 <script type="text/javascript">
+
+    var max;//最大记录数
+
     //1,页面加载完 直接发送Ajax请求
     $(function () {
         //首页
@@ -168,12 +175,16 @@
     }
     //分页信息
     function Build_page_info(result) {
+
         $("#page_info").empty();
         $("#page_info").append("当前第"+result.map.info.pageNum+"页,总"+result.map.info.pageSize+"页,总"+result.map.info.total+"记录");
+        max=result.map.info.total;
+
     }
     //分页条
     function Build_Page_nav(results) {
         $("#page_nav").empty();
+
         //首页
         var firstPage=$("<li></li>").append($("<a></a>").attr("href","#").append("首页"));
 
@@ -223,15 +234,42 @@
         }
     }
 
+    function reset_form(ele){
+        $(ele)[0].reset();//清空内容
+        $(ele +" div").removeClass("has-success has-error");
+        $(ele).find(".help-block").text("");
+
+    }
+
 
     ////点击添加按钮 弹出模态框
    $("#emp_add").click(function () {
     //弹出模态框之前，发送ajax请求；查询dept显示到DeptName
+       $("#empAdd select >").remove();
+       reset_form("#emps");//每次打开模态框；清楚里的内容和样式
        getDepts();
        $("#empAdd").modal({
            keyboard: "static"
        })
    });
+    //
+    $("#empName").change(function () {
+        //发送ajax请求，校验用户名是否可用
+        var  empName=this.value;
+        $.ajax({
+            url:"${path}/checkEmpName",
+            data:"empName="+empName,
+            type:"Post",
+            success:function (result) {
+              //  console.log(result);
+                if (result.code == 100){
+                    show_msg("#empName", "success", "用户可用");
+                } else {
+                    show_msg("#empName","error",result.map.slip);
+                }
+            }
+        });
+    });
     //查询部门信息
     function getDepts(){
         $.ajax({
@@ -239,7 +277,9 @@
             type:"GET",
             success:function (result) {
                 console.log(result);
+
                 $.each(result.map.depts,function (index,item) {
+
                     var delt= $("<option></option>").append(item.deptName).attr("value",item.deptId);
                     $("#empAdd select").append(delt);
                 })
@@ -247,15 +287,77 @@
         });
     }
 
+        //保存员工前 数据效应
+        function emp_save_from(){
+            //1,要拿到药校验的数据，使用正则表达式
+            //调用前每次清空元素之前的样式
+            var name= $("#empName").val();
+            var regName=/(^[a-zA-Z0-9_-]{6,16}$)|(^[\u2E80-\u9FFF]{2,5})/;
+
+            if (!regName.test(name)) {
+                show_msg("#empName","error","只能输入3-6个中文字符或者字符")
+                return false;
+            }else {
+
+                show_msg("#empName","success","")
+
+            }
+            //校验邮箱
+            var  email=$("#Email").val();
+            var regEamil=/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+            if (!regEamil.test(email)){
+
+                show_msg("#Email","error","正确书写邮箱格式");
+                return false;
+            }else{
+                show_msg("#Email","success","");
+            }
+            return true;
+        }
+        //校验信息
+        function show_msg(ele,status,msg){
+
+        //清楚元素状态
+            $(ele).parent().removeClass("has-success has-error");
+            if ("success"==status) {
+                $(ele).parent().addClass("has-success");
+                $(ele).next("span").text(msg);
+
+            }else if("error"==status){
+                $(ele).parent().addClass("has-error");
+                $(ele).next("span").text(msg);
+                return false;
+            }
+        }
+
         $("#emp_save").click(function () {
             //1,模态框中填写的表单提交给服务器
+            //数据校验
+            if (!emp_save_from()){
+
+                return false;
+            }
+
             //2，发送ajax请求
-            alert( $("#empAdd from").serialize());
-            <%--$.ajax({--%>
-            <%--url: "${path}/empSave",--%>
-            <%--type: "post",--%>
-            <%--data:--%>
-            <%--});--%>
+            var data= $("#emps").serialize();//获取from 表单的值
+            //防止中文乱码
+            data=decodeURIComponent(data,true)
+            $.ajax({
+            url: "${path}/empSave",
+            type: "post",
+            data:data,
+                success:function (result) {
+                    //添加成功之后 1，关闭模态框 2，调到最后一页
+                    if (result.code==100){
+                        $("#empAdd").modal("hide");
+                        to_page(max);
+                    }else {
+                        //失败
+                        console.log(result);
+                    }
+
+                }
+            });
         });
 
 

@@ -65,5 +65,8 @@ public class MVCTest {
         for (Emp emp : emps) {
             System.out.println(emp.getEmpId()+"" +emp.getEmpName());
         }
+
+
+
     }
 }

@@ -2,6 +2,7 @@ package com.bdqn.ssm.serice;
 
 import com.bdqn.ssm.dao.EmpMapper;
 import com.bdqn.ssm.entity.Emp;
+import com.bdqn.ssm.entity.EmpExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,5 +34,19 @@ public class EmpService {
      */
     public int saveEmp(Emp emp) {
        return empMapper.insertSelective(emp);
+    }
+
+    /**
+     * 检查用户是否可用
+     * @param empName
+     * @return
+     *  返回 true 可用  false不可用
+     */
+    public Boolean checkEmpName(String empName) {
+        EmpExample emp=new EmpExample();
+        EmpExample.Criteria criteria=emp.createCriteria();
+        criteria.andEmpNameEqualTo(empName);
+        Long aLong = empMapper.countByExample(emp);
+        return aLong==0;
     }
 }

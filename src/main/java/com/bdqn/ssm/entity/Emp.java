@@ -1,12 +1,19 @@
 package com.bdqn.ssm.entity;
 
+import org.hibernate.validator.constraints.Email;
+
+import javax.validation.constraints.Pattern;
+
 public class Emp {
     private Integer empId;
 
+    //Pattern  自定义规则
+    @Pattern(regexp = "(^[a-zA-Z0-9_-]{6,16}$)|(^[\\u2E80-\\u9FFF]{2,5})",message = "用户名只能是6——12的英文或者2-6的中文字母组合_后台")
     private String empName;
 
     private String gender;
 
+    @Email(message = "你很不对")
     private String email;
 
     private Integer dId;

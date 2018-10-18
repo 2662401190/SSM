@@ -34,7 +34,7 @@ public class Mas {
         return result;
     }
     public Mas add(String Key,Object o){
-        this.map.put(Key, o);
+        this  .map.put(Key, o);
         return  this;
     }
     public int getCode() {
