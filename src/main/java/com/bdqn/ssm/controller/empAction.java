@@ -30,6 +30,27 @@ public class empAction {
     private EmpService empService;
 
 
+
+    @RequestMapping(value = "/delect/{id}",method =RequestMethod.DELETE)
+    @ResponseBody
+    public Mas delect(@PathVariable(value = "id") Integer id) {
+          empService.delectEmp(id);
+
+          return Mas.success();
+    }
+
+    /**
+     * 更新员工数据
+     * @return
+     */
+    @RequestMapping(value = "/update/{empId}",method = RequestMethod.PUT)
+    @ResponseBody
+    public Mas update( Emp emp ){
+        System.out.println(emp.getEmpId()+"sdfs"+emp.getEmpName()+"邮箱"+emp.getEmail());
+        empService.updateEmp(emp);
+        return  Mas.success();
+    }
+
     @RequestMapping(value = "/getEmp/{id}", method = RequestMethod.GET)
     @ResponseBody
     public Mas getEmp(@PathVariable("id") Integer id){

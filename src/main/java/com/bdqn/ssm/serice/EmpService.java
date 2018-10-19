@@ -60,4 +60,12 @@ public class EmpService {
       return empMapper.selectByPrimaryKey(id);
 
     }
+
+    public void delectEmp(Integer id) {
+        empMapper.deleteByPrimaryKey(id);
+    }
+
+    public void updateEmp(Emp emp) {
+        empMapper.updateByPrimaryKeySelective(emp);
+    }
 }

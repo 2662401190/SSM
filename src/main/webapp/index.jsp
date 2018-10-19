@@ -187,7 +187,7 @@
 
 <script type="text/javascript">
 
-    var max;//最大记录数
+    var max,bym;//max最大记录数 bym 但前夜
 
     //1,页面加载完 直接发送Ajax请求
     $(function () {
@@ -224,10 +224,11 @@
             var email=$("<td></td>").append(item.email);
             var deptName=$("<td></td>").append(item.dept.deptName);
             //编辑  给他一个自定义属性；来表示当前员工的ID
-            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm").append($("<span></span>").addClass("glyphicon glyphicon-pencil edit_btn")).append("编辑");
+            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm edit_btn").append($("<span></span>").addClass("glyphicon glyphicon-pencil ")).append("编辑");
            editBtn.attr("empId",item.empId);
             //删除
-            var delBtn=$("<button></button>").addClass("btn btn-danger btn-sm").append($("<span></span>").addClass("glyphicon glyphicon-trash delete_btn" )).append("删除");
+            var delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append($("<span></span>").addClass("glyphicon glyphicon-trash ")).append("删除");
+
             var  Btn=$("<td></td>").append(editBtn).append(delBtn);
             $("<tr></tr>").append(empId).append(empName).append(gender).append(email).append(deptName).append(Btn).appendTo(".emp_table tbody");
         });
@@ -238,6 +239,7 @@
         $("#page_info").empty();
         $("#page_info").append("当前第"+result.map.info.pageNum+"页,总"+result.map.info.pageSize+"页,总"+result.map.info.total+"记录");
         max=result.map.info.total;
+        bym=result.map.info.pageNum;
 
     }
     //分页条
@@ -427,16 +429,17 @@
 
 
 
-    $(document).on("click",".edit_bt",function () {
-        alert(1)
-      //  getDepts("#empUpdate select");
-      // //查询员工信息
-      //   var id=$(this).attr("empId");
-      //   alert(id);
-      // getEmp(id);
-      //   $("#empUpdate").modal({
-      //       keyboard: "static"
-      //   })
+    $(document).on("click",".edit_btn",function () {
+
+       getDepts("#empUpdate select");
+      //查询员工信息
+        var id=$(this).attr("empId");
+
+        $("#emp_Update").attr("edit_id",id);
+      getEmp(id);
+        $("#empUpdate").modal({
+            keyboard: "static"
+        })
     });
 
     //查询emp表并显示员工信息
@@ -444,11 +447,43 @@
         $.ajax({
             url:"${path}/getEmp/"+id,
             type:"GET",
-            success:function (result) {
-                console.log(result);
+            success: function (result) {
+                // console.log(result);
+                var empData=result.map.emp;
+                $(".form-control-static").append(empData.empName);
+                $("#Email_update").val(empData.email);
+                //单选按钮
+                $("#empUpdate input[name='gender']").val([empData.gender]);
+                //下拉框
+                $("#empUpdate select").val([empData.dept]);
+
+
             }
         })
     }
+
+    //单个删除
+    $(document).on("click",".delete_btn",function () {
+        alert(1);
+    });
+
+
+    //点击跟新按钮 更新数据
+    $(document).on("click","#emp_Update",function () {
+
+        $.ajax({
+            url:"${path}/update/"+$(this).attr("edit_id"),
+            type:"put",
+            data:$("#empUpdate .form-horizontal").serialize(),
+            success:function (result) {
+               // 1, 关闭对话框
+                $("#empUpdate").modal("hide");
+                //2,回到本页面
+                to_page(bym);
+            }
+
+        })
+    })
 
 
 </script>
