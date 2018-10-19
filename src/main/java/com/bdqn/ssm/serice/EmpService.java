@@ -49,4 +49,15 @@ public class EmpService {
         Long aLong = empMapper.countByExample(emp);
         return aLong==0;
     }
+
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
+    public Emp getEmpId(Integer id) {
+
+      return empMapper.selectByPrimaryKey(id);
+
+    }
 }

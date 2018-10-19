@@ -10,10 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -32,6 +29,15 @@ public class empAction {
     @Autowired
     private EmpService empService;
 
+
+    @RequestMapping(value = "/getEmp/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public Mas getEmp(@PathVariable("id") Integer id){
+
+        Emp emp= empService.getEmpId(id);
+
+        return Mas.success().add("emp", emp);
+    }
 
     /**
      * 检查用户名是否可用
