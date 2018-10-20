@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,27 @@ public class empAction {
     private EmpService empService;
 
 
-
-    @RequestMapping(value = "/delect/{id}",method =RequestMethod.DELETE)
+    /**
+     * 删除·批量
+     * @param ids
+     * @return
+     */
+    @RequestMapping(value = "/delect/{ids}",method =RequestMethod.DELETE)
     @ResponseBody
-    public Mas delect(@PathVariable(value = "id") Integer id) {
-          empService.delectEmp(id);
+    public Mas delect(@PathVariable(value = "ids") String ids) {
+    if (ids.contains("-")){//批量删除
+        List<Integer> lits=new ArrayList<Integer>();
+        String [] slit=ids.split("-");
+        for (String s : slit) {
+            lits.add(Integer.parseInt(s));
+        }
+
+        empService.deleteAll(lits);
+        } else{//单个删除
+        Integer id=Integer.parseInt(ids);
+            empService.delectEmp(id);
+        }
+
 
           return Mas.success();
     }

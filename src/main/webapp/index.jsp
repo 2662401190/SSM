@@ -147,7 +147,7 @@
     <div class="row">
         <div class="col-md-4 col-md-offset-8">
             <button class="btn btn-primary  " id="emp_add" data-toggle="modal">添加</button>
-            <button class="btn btn-danger ">删除</button>
+            <button class="btn btn-danger " id="delete_all">删除</button>
         </div>
     </div>
     <!--显示表格数据-->
@@ -156,12 +156,13 @@
             <table class="table  table-hover emp_table" >
                 <tbody>
                     <tr>
-                        <th>ID</th>
-                        <th>EmpName</th>
-                        <th>Gender</th>
-                        <th>Email</th>
-                        <th>DeptName</th>
-                        <th>Operate </th>
+                        <input type="checkbox" id="Box_all">
+                        <td>ID</td>
+                        <td>EmpName</td>
+                        <td>Gender</td>
+                        <td>Email</td>
+                        <td>DeptName</td>
+                        <td>Operate </td>
                     </tr>
                 </tbody>
             </table>
@@ -218,6 +219,7 @@
         $(".emp_table tbody").empty();
         var emps=result.map.info.list;
         $.each(emps,function (index,item) {
+            var checkBox=$("<td></td>").append($("<input type='checkbox' class='check_item'/>"));
             var empId=$("<td></td>").append(item.empId);
             var empName=$("<td></td>").append(item.empName);
             var gender=$("<td></td>").append(item.gender=="M"?"男":"女");
@@ -230,7 +232,8 @@
             var delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append($("<span></span>").addClass("glyphicon glyphicon-trash ")).append("删除");
 
             var  Btn=$("<td></td>").append(editBtn).append(delBtn);
-            $("<tr></tr>").append(empId).append(empName).append(gender).append(email).append(deptName).append(Btn).appendTo(".emp_table tbody");
+            $("<tr></tr>").append(checkBox).append(empId).append(empName).append(gender).append(email).append(deptName).append(Btn).appendTo(".emp_table tbody");
+
         });
     }
     //分页信息
@@ -462,10 +465,7 @@
         })
     }
 
-    //单个删除
-    $(document).on("click",".delete_btn",function () {
-        alert(1);
-    });
+
 
 
     //点击跟新按钮 更新数据
@@ -485,7 +485,56 @@
         })
     })
 
+    //单个删除
+    $(document).on("click",".delete_btn",function () {
+      var name= $(this).parents("tr").find("td:eq(1)").html();
+      if(confirm("确认删除"+name+"吗")){
+            $.ajax({
+                url:"${path}/delect/"+$(this).parents("tr").find("td:eq(0)").html(),
+                type:"delete",
+                success:function (result) {
+                    //回到本ye
+                    to_page(bym);
+                }
+            });
+      }
+    });
+    
+    //全选、全不选
+    $("#Box_all").click(function () {
+        //attr()获取自定义属性的值
+        // prop（）获取属性原生的值
+       $(".check_item").prop("checked",$(this).prop("checked"));
 
+    });
+
+    $(document).on("click",".check_item",function () {
+       var fi= $(".check_item:checked").length==$(".check_item").length;
+       $("#Box_all").prop("checked",fi);
+    });
+
+    //全部删除
+    $("#delete_all").click(function () {
+
+        var name="";
+        var  deletes="";
+        $.each($(".check_item:checked"),function () {
+            name+= $(this).parents("tr").find("td:eq(2)").text()+",";
+            deletes+=$(this).parents("tr").find("td:eq(1)").text()+"-";
+        });
+        //去逗号
+        name=name.substring(0,name.length-1);
+        if(confirm("确定要删除"+name+"吗")){
+            $.ajax({
+                url:"${path}/delect/"+deletes,
+                type:"delete",
+                success:function (result) {
+                    alert(result.msg);
+                    to_page(bym);
+                }
+            })
+        }
+    });
 </script>
 
 </body>

@@ -68,4 +68,13 @@ public class EmpService {
     public void updateEmp(Emp emp) {
         empMapper.updateByPrimaryKeySelective(emp);
     }
+
+    public void deleteAll(List<Integer> ids) {
+        EmpExample empExample=new EmpExample();
+        EmpExample.Criteria criteria =empExample.createCriteria();
+        criteria.andEmpIdIn(ids);
+        // delete from emp where id in(1,2,3)
+        empMapper.deleteByExample(empExample);
+
+    }
 }
